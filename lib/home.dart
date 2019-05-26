@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'workers.dart';
+import 'webafrica.dart';
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -29,27 +29,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getData() async {
-    DummyChecker webAfricaChecker = DummyChecker();
-    String login = await webAfricaChecker.login(username, password);
-    
-    if (login != "")
+    var usage = await getWebAfricaUsage(username, password);
+    if (usage.length == 0)
     {
       setState(() {
           _loading = false;
           _error = true;
-          _errorMessage =  login;
+          _errorMessage = "Login Failed";
           });
         return;
     }
 
-    List<String> products = await webAfricaChecker.getProductList();
-    _products = List<Map<String, String>>();
-
-    for (var productId in products) {
-      var result = await webAfricaChecker.getProduct(productId);
-      _products.insert(_products.length, result);
-    }
     setState(() {
+     _products = usage;
      _loading = false;
      _error = false; 
     });
