@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fibre_balance_check/usage.dart';
 import 'package:flutter/material.dart';
 import 'webafrica.dart';
 
@@ -16,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   bool _loading = true;
   bool _error = false;
   String _errorMessage = "";
-  List<Map<String, String>> _products;
+  List<Usage> _products;
 
   final String username;
   final String password;
@@ -65,7 +66,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Widget _buildItem(Map<String, String> product) {
+  Widget _buildItem(Usage product) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8),
       child: Container(
@@ -79,14 +80,14 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: <Widget>[
             Text(
-              _getFriendlyName(product["id"], product["packageName"]),
+              _getFriendlyName(product.id, product.packageName),
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(product["usage"], style: TextStyle(color: Colors.blueGrey)),
+                child: Text(product.usage, style: TextStyle(color: Colors.blueGrey)),
               ),
             ),
             Padding(
@@ -94,7 +95,7 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 children: <Widget>[
                   Text("updated: "),
-                  Text(product["lastUpdate"]),
+                  Text(product.lastUpdate),
                 ],
               ),
             ),

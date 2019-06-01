@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:fibre_balance_check/usage.dart';
+
 String _getInput(String page, String attrib, String value) {
   RegExp exp = new RegExp(r"\<input.*/>", multiLine: true);
   for (var match in exp.allMatches(page)) {
@@ -51,23 +53,21 @@ List<String> productList(String productsPage) {
   return results;
 }
 
-Map<String, String> getProduct(String productPage, String productId) {
-  Map<String, String> results = Map<String, String>();
-  results["id"] = productId.substring(3);
-  results["packageName"] = _getInput(productPage, 'data-role', 'packageName');
-  results["lastUpdate"] = _getSpan(productPage,
-      'ctl00_ctl00_contentDefault_contentControlPanel_lbllastUpdted');
-  String lteUsage = _getSpan(productPage,
+Usage getProduct(String productPage, String productId) {
+  var result = Usage(
+    id: productId.substring(3),
+    packageName: _getInput(productPage, 'data-role', 'packageName'),
+    lastUpdate: _getSpan(productPage,
+      'ctl00_ctl00_contentDefault_contentControlPanel_lbllastUpdted'),
+  );
+  var lteUsage = _getSpan(productPage,
       'ctl00_ctl00_contentDefault_contentControlPanel_lblAnytimeCap');
   if (lteUsage != '')
-    results["usage"] = lteUsage;
-  else {
-    results["usage"] = null;
-  }
-  return results;
+    result.usage = lteUsage;
+  return result;
 }
 
-Future<List<Map<String, String>>> getWebAfricaUsage(
+Future<List<Usage>> getWebAfricaUsage(
     String username, String password) async {
   final String urlHome = "https://www.webafrica.co.za/clientarea.php";
   final String urlLogin = "https://www.webafrica.co.za/dologin.php";
@@ -106,7 +106,7 @@ Future<List<Map<String, String>>> getWebAfricaUsage(
   body = await stream.join();
 
   List<String> products = productList(body);
-  List<Map<String, String>> usageList = List<Map<String, String>>();
+  var usageList = List<Usage>();
   for (var productId in products) {
     String url = urlProduct.replaceAll(RegExp("{productId}"), productId);
 
@@ -130,7 +130,7 @@ Future<List<Map<String, String>>> getWebAfricaUsage(
     body = await stream.join();
 
     var results = getProduct(body, productId);
-    if (results['usage'] == null) {
+    if (results.usage == null) {
       String username = _getInput(body, 'data-role', 'userName');
       request = await client.getUrl(Uri.parse(urlFibre + Uri.encodeQueryComponent(username)));
       response = await request.close();
@@ -140,7 +140,7 @@ Future<List<Map<String, String>>> getWebAfricaUsage(
       var map = json.decode(body);
       var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
       var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
-      results['usage'] = '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
+      results.usage = '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
     }
     usageList.add(results);
   }
