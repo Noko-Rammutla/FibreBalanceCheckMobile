@@ -5,23 +5,16 @@ import 'package:flutter/material.dart';
 import 'webafrica.dart';
 
 class HomePage extends StatefulWidget {
-  final String username;
-  final String password;
-  HomePage({Key key, this.username, this.password}) : super(key: key);
+  final WebAfricaUsage webAfricaUsage;
+  HomePage({Key key, this.webAfricaUsage}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState(username: username, password: password);
+  _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   bool _loading = true;
-  bool _error = false;
-  String _errorMessage = "";
   List<Usage> _products = List<Usage>();
-
-  final String username;
-  final String password;
-  _HomePageState({this.username, this.password});
   
   @override
   void initState() {
@@ -30,26 +23,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getData() async {
-    WebAfricaUsage webAfricaUsage = WebAfricaUsage();
-    
-    bool loggedIn = await webAfricaUsage.login(username, password);
-    if (loggedIn == false)
-    {
-      setState(() {
-          _loading = false;
-          _error = true;
-          _errorMessage = "Login Failed";
-          });
-        return;
-    }
-
-    setState(() {
-     _loading = true;
-     _error = false; 
-    });
-
-    for (var productId in await webAfricaUsage.getProductList()) {
-      var usage = await webAfricaUsage.getUsage(productId);
+    for (var productId in await widget.webAfricaUsage.getProductList()) {
+      var usage = await widget.webAfricaUsage.getUsage(productId);
       setState(() {
        _products.add(usage); 
       });
@@ -67,12 +42,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_error) {
-      return _buildErrorScreen(context);
-    }
-    else {
       return _buildBalanceScreen(context);
-    }
   }
 
   Widget _buildItem(Usage product) {
@@ -137,24 +107,5 @@ class _HomePageState extends State<HomePage> {
           child: CircularProgressIndicator(),
         ),
      );
-  }
-
-  Widget _buildErrorScreen(BuildContext context) {
-     return Scaffold(
-      appBar: AppBar(
-        title: Text('Error'),
-      ),
-      body: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 60),
-            child: Text(
-              _errorMessage,
-              style: TextStyle(
-                color: Colors.red,
-              ),
-            ),
-          ),
-        ),
-    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:fibre_balance_check/home.dart';
+import 'package:fibre_balance_check/webafrica.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,6 +10,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  bool _error = false;
+  bool _loggingIn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +26,7 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 Text('Fibre/LTE Balance Check'),
                 SizedBox(height: 80),
-                Text('WebAfrica Only',
-                  style: TextStyle(color: Colors.red))
+                Text('WebAfrica Only', style: TextStyle(color: Colors.red))
               ],
             ),
             SizedBox(height: 120.0),
@@ -54,21 +57,49 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 RaisedButton(
                   child: Text('NEXT'),
-                  onPressed: () {
-                    Navigator.push(context, 
-                      MaterialPageRoute(builder: (context) => HomePage(
-                          username: _usernameController.text,
-                          password: _passwordController.text,
-                        )
-                      )
-                    );
-                  },
-                )
+                  onPressed: _loggingIn ? null : attempLogin,
+                ),
               ],
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 48.0),
+              child: Center(
+                child: Text(_error ? "Login Failed" : "",
+                    style: TextStyle(color: Colors.red)),
+              ),
             )
           ],
         ),
       ),
     );
+  }
+
+  void attempLogin() {
+    setState(() {
+      _error = false;
+      _loggingIn = true;
+    });
+    WebAfricaUsage webAfricaUsage = WebAfricaUsage();
+    webAfricaUsage
+        .login(_usernameController.text, _passwordController.text)
+        .then((bool value) {
+      if (value == true) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => HomePage(
+                      webAfricaUsage: webAfricaUsage,
+                    )));
+        setState(() {
+          _error = false;
+          _loggingIn = false;
+        });
+      } else {
+        setState(() {
+          _error = true;
+          _loggingIn = false;
+        });
+      }
+    });
   }
 }
