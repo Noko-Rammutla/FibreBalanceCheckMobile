@@ -58,17 +58,106 @@ Usage getProduct(String productPage, String productId) {
     id: productId.substring(3),
     packageName: _getInput(productPage, 'data-role', 'packageName'),
     lastUpdate: _getSpan(productPage,
-      'ctl00_ctl00_contentDefault_contentControlPanel_lbllastUpdted'),
+        'ctl00_ctl00_contentDefault_contentControlPanel_lbllastUpdted'),
   );
   var lteUsage = _getSpan(productPage,
       'ctl00_ctl00_contentDefault_contentControlPanel_lblAnytimeCap');
-  if (lteUsage != '')
-    result.usage = lteUsage;
+  if (lteUsage != '') result.usage = lteUsage;
   return result;
 }
 
-Future<List<Usage>> getWebAfricaUsage(
-    String username, String password) async {
+class WebAfricaUsage {
+  final String urlHome = "https://www.webafrica.co.za/clientarea.php";
+  final String urlLogin = "https://www.webafrica.co.za/dologin.php";
+  final String urlProducts =
+      "https://www.webafrica.co.za/myservices.php?pagetype=adsl";
+  final String urlProduct =
+      "https://www.webafrica.co.za/clientarea.php?action=productdetails&{productId}&modop=custom&a=LoginToDSLConsole";
+  final String urlUsage = "https://usage.webafrica.co.za/usage.html";
+  final String urlFibre =
+      "https://www.webafrica.co.za/includes/fup.handler.php?cmd=getfupinfo&username=";
+
+  List<Cookie> _cookies = List<Cookie>();
+  HttpClient _client = new HttpClient();
+
+  Future<bool> login(String username, String password) async {
+    var request = await _client.getUrl(Uri.parse(urlHome));
+    var response = await request.close();
+
+    _cookies = response.cookies;
+    Stream<String> stream = response.transform(utf8.decoder);
+    String body = await stream.join();
+
+    String token = loginToken(body);
+    request = await _client.postUrl(Uri.parse(urlLogin));
+    request.headers.set('content-type', 'application/x-www-form-urlencoded');
+    request.cookies.addAll(_cookies);
+    body =
+        'token=${Uri.encodeQueryComponent(token)}&username=${Uri.encodeQueryComponent(username)}&password=${Uri.encodeQueryComponent(password)}';
+    request.add(utf8.encode(body));
+
+    response = await request.close();
+    bool success = false;
+    response.headers.forEach((String name, List<String> values) {
+      if (name == 'location' && values[0] == "/clientarea.php")
+        success = true;
+    });
+
+    return success;
+  }
+
+  Future<List<String>> getProductList() async {
+    var request = await _client.getUrl(Uri.parse(urlProducts));
+    request.cookies.addAll(_cookies);
+    var response = await request.close();
+    var stream = response.transform(utf8.decoder);
+    var body = await stream.join();
+
+    return productList(body);
+  }
+
+  Future<Usage> getUsage(String productId) async {
+    String url = urlProduct.replaceAll(RegExp("{productId}"), productId);
+
+    var request = await _client.getUrl(Uri.parse(url));
+    request.followRedirects = false;
+    request.cookies.addAll(_cookies);
+    var response = await request.close();
+    await response.transform(utf8.decoder).join();
+    response = await response.redirect();
+
+    List<Cookie> usageCookies = response.cookies;
+    request = await _client.getUrl(Uri.parse(urlUsage));
+    request.cookies.add(_cookies[0]);
+    request.cookies.add(usageCookies[0]);
+    request.cookies.add(usageCookies[4]);
+    request.cookies.add(usageCookies[5]);
+    request.cookies.add(usageCookies[6]);
+    response = await request.close();
+
+    var stream = response.transform(utf8.decoder);
+    var body = await stream.join();
+
+    var results = getProduct(body, productId);
+    if (results.usage == null) {
+      String username = _getInput(body, 'data-role', 'userName');
+      request = await _client
+          .getUrl(Uri.parse(urlFibre + Uri.encodeQueryComponent(username)));
+      response = await request.close();
+
+      Stream<String> stream = response.transform(utf8.decoder);
+      body = await stream.join();
+      var map = json.decode(body);
+      var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
+      var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
+      results.usage =
+          '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
+    }
+    return results;
+  }
+}
+
+Future<List<Usage>> getWebAfricaUsage(String username, String password) async {
   final String urlHome = "https://www.webafrica.co.za/clientarea.php";
   final String urlLogin = "https://www.webafrica.co.za/dologin.php";
   final String urlProducts =
@@ -132,7 +221,8 @@ Future<List<Usage>> getWebAfricaUsage(
     var results = getProduct(body, productId);
     if (results.usage == null) {
       String username = _getInput(body, 'data-role', 'userName');
-      request = await client.getUrl(Uri.parse(urlFibre + Uri.encodeQueryComponent(username)));
+      request = await client
+          .getUrl(Uri.parse(urlFibre + Uri.encodeQueryComponent(username)));
       response = await request.close();
 
       Stream<String> stream = response.transform(utf8.decoder);
@@ -140,7 +230,8 @@ Future<List<Usage>> getWebAfricaUsage(
       var map = json.decode(body);
       var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
       var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
-      results.usage = '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
+      results.usage =
+          '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
     }
     usageList.add(results);
   }

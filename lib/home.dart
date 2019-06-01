@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   bool _loading = true;
   bool _error = false;
   String _errorMessage = "";
-  List<Usage> _products;
+  List<Usage> _products = List<Usage>();
 
   final String username;
   final String password;
@@ -30,8 +30,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getData() async {
-    var usage = await getWebAfricaUsage(username, password);
-    if (usage.length == 0)
+    WebAfricaUsage webAfricaUsage = WebAfricaUsage();
+    
+    bool loggedIn = await webAfricaUsage.login(username, password);
+    if (loggedIn == false)
     {
       setState(() {
           _loading = false;
@@ -42,9 +44,19 @@ class _HomePageState extends State<HomePage> {
     }
 
     setState(() {
-     _products = usage;
-     _loading = false;
+     _loading = true;
      _error = false; 
+    });
+
+    for (var productId in await webAfricaUsage.getProductList()) {
+      var usage = await webAfricaUsage.getUsage(productId);
+      setState(() {
+       _products.add(usage); 
+      });
+    }
+
+    setState(() {
+     _loading = false;
     });
   }
 
@@ -55,10 +67,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return _buildLoadingScreen(context);
-    }
-    else if (_error) {
+    if (_error) {
       return _buildErrorScreen(context);
     }
     else {
@@ -106,26 +115,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBalanceScreen(BuildContext context) {
+    var widgetList = _products.map(_buildItem).toList();
+    if (_loading) {
+      widgetList.add(_buildLoadingIndicator(context));
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("Balances"),
       ),
       body: ListView(
         padding: EdgeInsets.all(16),
-        children: _products.map(_buildItem).toList(),
+        children: widgetList,
       ),
     );
   }
 
-  Widget _buildLoadingScreen(BuildContext context) {
-     return Scaffold(
-      appBar: AppBar(
-        title: Text('Loading...'),
-      ),
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+  Widget _buildLoadingIndicator(BuildContext context) {
+     return Padding(
+       padding: const EdgeInsets.all(32.0),
+       child: Center(
+          child: CircularProgressIndicator(),
+        ),
+     );
   }
 
   Widget _buildErrorScreen(BuildContext context) {
