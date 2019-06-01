@@ -130,7 +130,18 @@ Future<List<Map<String, String>>> getWebAfricaUsage(
     body = await stream.join();
 
     var results = getProduct(body, productId);
-    if (results['usage'] == null) results['usage'] = 'Not Implemented';
+    if (results['usage'] == null) {
+      String username = _getInput(body, 'data-role', 'userName');
+      request = await client.getUrl(Uri.parse(urlFibre + Uri.encodeQueryComponent(username)));
+      response = await request.close();
+
+      Stream<String> stream = response.transform(utf8.decoder);
+      body = await stream.join();
+      var map = json.decode(body);
+      var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
+      var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
+      results['usage'] = '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
+    }
     usageList.add(results);
   }
 
