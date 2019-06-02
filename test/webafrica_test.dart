@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fibre_balance_check/usage.dart';
 import 'package:test/test.dart';
 import 'package:fibre_balance_check/webafrica.dart';
 
@@ -47,7 +48,7 @@ void main() {
       body = await stream.join();
 
       List<String> products = productList(body);
-      List<Map<String, String>> usageList = List<Map<String, String>>();
+      List<Usage> usageList = List<Usage>();
       for (var productId in products) {
         String url = urlProduct.replaceAll(RegExp("{productId}"), productId);
 
@@ -71,7 +72,21 @@ void main() {
         body = await stream.join();
 
         var results = getProduct(body, productId);
-        if (results['usage'] == null) results['usage'] = 'Not Implemented';
+        if (results.usage == null) {
+          String username = getInput(body, 'data-role', 'userName');
+          request = await client
+              .getUrl(Uri.parse(urlFibre + Uri.encodeQueryComponent(username)));
+          response = await request.close();
+
+          Stream<String> stream = response.transform(utf8.decoder);
+          body = await stream.join();
+          var map = json.decode(body);
+          var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
+          var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
+          results.usage =
+              '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
+        }
+
         usageList.add(results);
       }
 
@@ -79,9 +94,11 @@ void main() {
     });
 
     test('worker test', () async {
-      var usageList = await getWebAfricaUsage(_username, _password);
-      for (var usage in usageList) {
-        print('${usage['packageName']} = ${usage['usage']}');
+      var webAfricaUsage = WebAfricaUsage();
+      webAfricaUsage.login(_username, _password);
+      for (var productId in await webAfricaUsage.getProductList()) {
+        var usage = await webAfricaUsage.getUsage(productId);
+        print('${usage.packageName} = ${usage.usage}');
       }
     });
   });
