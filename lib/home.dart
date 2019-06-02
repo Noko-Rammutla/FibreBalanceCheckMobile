@@ -1,4 +1,4 @@
-import 'package:fibre_balance_check/usage.dart';
+import 'package:fibre_balance_check/common/usage.dart';
 import 'package:flutter/material.dart';
 import 'package:fibre_balance_check/providers/base_provider.dart';
 

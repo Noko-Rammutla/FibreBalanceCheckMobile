@@ -1,4 +1,4 @@
-import 'package:fibre_balance_check/usage.dart';
+import 'package:fibre_balance_check/common/usage.dart';
 import 'dart:async';
 
 abstract class BaseProvider {

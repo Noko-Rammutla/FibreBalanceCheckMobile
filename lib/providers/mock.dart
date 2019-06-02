@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:fibre_balance_check/providers/base_provider.dart';
-import 'package:fibre_balance_check/usage.dart';
+import 'package:fibre_balance_check/common/usage.dart';
 
 class MockUsage implements BaseProvider{
   Duration productListDelay;

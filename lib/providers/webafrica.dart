@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:fibre_balance_check/common/html_utils.dart';
 import 'package:fibre_balance_check/providers/base_provider.dart';
-import 'package:fibre_balance_check/usage.dart';
+import 'package:fibre_balance_check/common/usage.dart';
 
 String loginToken(String homePage) {
   return getInput(homePage, "name", "token");
