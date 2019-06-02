@@ -61,6 +61,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text("Balances"),
+        backgroundColor: Colors.blueGrey,
       ),
       body: ListView(
         padding: EdgeInsets.all(16),

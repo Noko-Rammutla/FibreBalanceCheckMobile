@@ -10,10 +10,19 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _provider = WebAfricaUsage();
+  final _providers = <BaseProvider>[WebAfricaUsage(), MockUsage(usageDelay: Duration(seconds: 1))];
+  BaseProvider _provider;
 
   bool _error = false;
   bool _loggingIn = false;
+
+  @override
+  initState() {
+    super.initState();
+    setState(() {
+    _provider = _providers[0]; 
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +34,28 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 80.0),
             Column(
               children: <Widget>[
-                Text('Fibre/LTE Balance Check'),
-                SizedBox(height: 80),
-                Text('WebAfrica Only', style: TextStyle(color: Colors.red))
+                Text('Fibre/LTE Balance Check', style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                )),
+                SizedBox(height: 40),
+                Text('WebAfrica only', style: TextStyle(color: Colors.red)),
+                SizedBox(height: 160),
+                Text('Select Internet Provider'),
+                DropdownButton(
+                  value: _provider,
+                  isExpanded: true,
+                  items: getDropDownItems(),
+                  onChanged: (value) {
+                    setState(() {
+                     _provider = value; 
+                    });
+                  },
+                ),
               ],
             ),
-            SizedBox(height: 120.0),
+            SizedBox(height: 20.0),
             TextField(
               decoration: InputDecoration(
                 filled: true,
@@ -73,6 +98,19 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  List<DropdownMenuItem<BaseProvider>> getDropDownItems() {
+    var list = List<DropdownMenuItem<BaseProvider>>();
+    for (var provider in _providers) {
+      list.add(
+        DropdownMenuItem<BaseProvider>(
+          child: Center(child: Text(provider.getName())),
+          value: provider,
+        )
+      );
+    }
+    return list;
   }
 
   void attempLogin() {

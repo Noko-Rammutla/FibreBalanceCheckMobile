@@ -64,7 +64,7 @@ class MockUsage implements BaseProvider{
 
   @override
   String getName() {
-    return "Name";
+    return "Demo Usage";
   }
 
 }
