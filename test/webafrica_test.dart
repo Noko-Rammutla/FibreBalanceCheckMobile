@@ -29,7 +29,7 @@ void main() {
       Stream<String> stream = response.transform(utf8.decoder);
       String body = await stream.join();
 
-      String token = loginToken(body);
+      String token = getInput(body, "name", "token");
       request = await client.postUrl(Uri.parse(urlLogin));
       request.headers.set('content-type', 'application/x-www-form-urlencoded');
       request.cookies.addAll(cookies);
@@ -38,7 +38,6 @@ void main() {
       request.add(utf8.encode(body));
 
       response = await request.close();
-      //cookies.addAll(response.cookies);
       stream = response.transform(utf8.decoder);
       body = await stream.join();
 

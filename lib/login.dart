@@ -10,11 +10,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _provider = MockUsage(
-    // loginDelay: Duration(seconds: 1),
-    // productListDelay: Duration(milliseconds: 500),
-    usageDelay: Duration(seconds: 2),
-  );
+  final _provider = WebAfricaUsage();
 
   bool _error = false;
   bool _loggingIn = false;

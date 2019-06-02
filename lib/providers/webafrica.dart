@@ -5,10 +5,6 @@ import 'package:fibre_balance_check/common/html_utils.dart';
 import 'package:fibre_balance_check/providers/base_provider.dart';
 import 'package:fibre_balance_check/common/usage.dart';
 
-String loginToken(String homePage) {
-  return getInput(homePage, "name", "token");
-}
-
 List<String> productList(String productsPage) {
   List<String> results = List<String>();
 
@@ -35,7 +31,11 @@ Usage getProduct(String productPage, String productId) {
   );
   var lteUsage = getSpan(productPage,
       'ctl00_ctl00_contentDefault_contentControlPanel_lblAnytimeCap');
-  if (lteUsage != '') result.usage = lteUsage;
+  if (lteUsage != '') {
+    lteUsage = lteUsage.substring(1, lteUsage.length - 1);
+    lteUsage = lteUsage.replaceAll(',', '.');
+    result.usage = lteUsage;
+  }
   return result;
 }
 
@@ -62,7 +62,7 @@ class WebAfricaUsage implements BaseProvider{
     Stream<String> stream = response.transform(utf8.decoder);
     String body = await stream.join();
 
-    String token = loginToken(body);
+    String token = getInput(body, "name", "token");
     request = await _client.postUrl(Uri.parse(urlLogin));
     request.headers.set('content-type', 'application/x-www-form-urlencoded');
     request.cookies.addAll(_cookies);
@@ -127,7 +127,7 @@ class WebAfricaUsage implements BaseProvider{
       var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
       var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
       results.usage =
-          '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
+          '${usage.toStringAsFixed(2)} of ${total.toStringAsFixed(2)} GB';
     }
     return results;
   }

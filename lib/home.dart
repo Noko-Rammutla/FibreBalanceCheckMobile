@@ -1,4 +1,5 @@
 import 'package:fibre_balance_check/common/usage.dart';
+import 'package:fibre_balance_check/usage_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fibre_balance_check/providers/base_provider.dart';
 
@@ -10,9 +11,9 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _loading = true;
-  List<Usage> _products = List<Usage>();
+  List<UsageView> _products = List<UsageView>();
   
   @override
   void initState() {
@@ -21,11 +22,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getData() async {
-    for (var productId in await widget.usageProvider.getProductList()) {
+    var productList  = await widget.usageProvider.getProductList();
+    for (var productId in productList.reversed) {
       var usage = await widget.usageProvider.getUsage(productId);
-      setState(() {
-       _products.add(usage); 
-      });
+      _handleInsert(usage);
     }
 
     setState(() {
@@ -33,56 +33,28 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  String _getFriendlyName(String id, String defaultName) {
-    return defaultName;
-  }    
-
   @override
   Widget build(BuildContext context) {
       return _buildBalanceScreen(context);
   }
 
-  Widget _buildItem(Usage product) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 2,
-            color: Colors.black,
-          ),
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-        ),
-        child: Column(
-          children: <Widget>[
-            Text(
-              _getFriendlyName(product.id, product.packageName),
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(product.usage, style: TextStyle(color: Colors.blueGrey)),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              child: Row(
-                children: <Widget>[
-                  Text("updated: "),
-                  Text(product.lastUpdate),
-                ],
-              ),
-            ),
-          ],
-        ),
-      )
+  void _handleInsert(Usage usage) {
+    UsageView view = UsageView(
+      usage: usage,
+      animationController: AnimationController(
+        duration: Duration(milliseconds: 500),
+        vsync: this,
+      ),
     );
+    setState(() {
+     _products.insert(0, view); 
+    });
+    view.animationController.forward();
   }
-
+ 
   Widget _buildBalanceScreen(BuildContext context) {
-    var widgetList = _products.map(_buildItem).toList();
+    var widgetList = <Widget>[];
+    widgetList.addAll(_products);
     if (_loading) {
       widgetList.add(_buildLoadingIndicator(context));
     }
@@ -105,4 +77,11 @@ class _HomePageState extends State<HomePage> {
         ),
      );
   }
+
+  @override
+  void dispose() {
+    for (var view in _products)
+      view.animationController.dispose();
+    super.dispose();
+  }  
 }
