@@ -1,5 +1,5 @@
 import 'package:fibre_balance_check/home.dart';
-import 'package:fibre_balance_check/webafrica.dart';
+import 'package:fibre_balance_check/providers/providers.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -10,6 +10,11 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _provider = MockUsage(
+    // loginDelay: Duration(seconds: 1),
+    // productListDelay: Duration(milliseconds: 500),
+    usageDelay: Duration(seconds: 2),
+  );
 
   bool _error = false;
   bool _loggingIn = false;
@@ -79,8 +84,7 @@ class _LoginPageState extends State<LoginPage> {
       _error = false;
       _loggingIn = true;
     });
-    WebAfricaUsage webAfricaUsage = WebAfricaUsage();
-    webAfricaUsage
+    _provider
         .login(_usernameController.text, _passwordController.text)
         .then((bool value) {
       if (value == true) {
@@ -88,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
             context,
             MaterialPageRoute(
                 builder: (context) => HomePage(
-                      webAfricaUsage: webAfricaUsage,
+                      usageProvider: _provider,
                     )));
         setState(() {
           _error = false;

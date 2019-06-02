@@ -1,36 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:fibre_balance_check/common/html_utils.dart';
+import 'package:fibre_balance_check/providers/base_provider.dart';
 import 'package:fibre_balance_check/usage.dart';
-
-String getInput(String page, String attrib, String value) {
-  RegExp exp = new RegExp(r"\<input.*/>", multiLine: true);
-  for (var match in exp.allMatches(page)) {
-    String link = page.substring(match.start, match.end);
-    if (link.contains(attrib + '="' + value + '"')) {
-      exp = new RegExp(r'value=".*?"', multiLine: true);
-      value = exp.stringMatch(link);
-      if (value == null) return "";
-      return value.substring(7, value.length - 1);
-    }
-  }
-  return "";
-}
-
-String getSpan(String page, String spanId) {
-  RegExp exp = new RegExp(r'\<span.*?\</span>', multiLine: true);
-  for (var match in exp.allMatches(page)) {
-    String span = page.substring(match.start, match.end);
-    if (span.contains('id="' + spanId + '"')) {
-      String text =
-          span.substring(span.indexOf(RegExp(r'>')) + 1, span.length - 7);
-      text = text.replaceAll(RegExp(r'\<b>'), '');
-      text = text.replaceAll(RegExp(r'\</b>'), '');
-      return text;
-    }
-  }
-  return "";
-}
 
 String loginToken(String homePage) {
   return getInput(homePage, "name", "token");
@@ -66,7 +39,7 @@ Usage getProduct(String productPage, String productId) {
   return result;
 }
 
-class WebAfricaUsage {
+class WebAfricaUsage implements BaseProvider{
   final String urlHome = "https://www.webafrica.co.za/clientarea.php";
   final String urlLogin = "https://www.webafrica.co.za/dologin.php";
   final String urlProducts =
@@ -80,6 +53,7 @@ class WebAfricaUsage {
   List<Cookie> _cookies = List<Cookie>();
   HttpClient _client = new HttpClient();
 
+  @override
   Future<bool> login(String username, String password) async {
     var request = await _client.getUrl(Uri.parse(urlHome));
     var response = await request.close();
@@ -106,6 +80,7 @@ class WebAfricaUsage {
     return success;
   }
 
+  @override
   Future<List<String>> getProductList() async {
     var request = await _client.getUrl(Uri.parse(urlProducts));
     request.cookies.addAll(_cookies);
@@ -116,6 +91,7 @@ class WebAfricaUsage {
     return productList(body);
   }
 
+  @override
   Future<Usage> getUsage(String productId) async {
     String url = urlProduct.replaceAll(RegExp("{productId}"), productId);
 
@@ -154,5 +130,10 @@ class WebAfricaUsage {
           '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
     }
     return results;
+  }
+
+  @override
+  String getName() {
+    return 'WebAfrica';
   }
 }

@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fibre_balance_check/common/html_utils.dart';
 import 'package:fibre_balance_check/usage.dart';
 import 'package:test/test.dart';
-import 'package:fibre_balance_check/webafrica.dart';
+import 'package:fibre_balance_check/providers/webafrica.dart';
 
 const String _username = 'username';
 const String _password = 'password';

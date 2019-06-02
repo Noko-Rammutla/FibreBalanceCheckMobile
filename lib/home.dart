@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:fibre_balance_check/usage.dart';
 import 'package:flutter/material.dart';
-import 'webafrica.dart';
+import 'package:fibre_balance_check/providers/base_provider.dart';
 
 class HomePage extends StatefulWidget {
-  final WebAfricaUsage webAfricaUsage;
-  HomePage({Key key, this.webAfricaUsage}) : super(key: key);
+  final BaseProvider usageProvider;
+  HomePage({Key key, this.usageProvider}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -23,8 +21,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getData() async {
-    for (var productId in await widget.webAfricaUsage.getProductList()) {
-      var usage = await widget.webAfricaUsage.getUsage(productId);
+    for (var productId in await widget.usageProvider.getProductList()) {
+      var usage = await widget.usageProvider.getUsage(productId);
       setState(() {
        _products.add(usage); 
       });
@@ -34,7 +32,6 @@ class _HomePageState extends State<HomePage> {
      _loading = false;
     });
   }
-
 
   String _getFriendlyName(String id, String defaultName) {
     return defaultName;
