@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:fibre_balance_check/providers/base_provider.dart';
 import 'package:fibre_balance_check/common/usage.dart';
+import 'package:intl/intl.dart';
 
 class MockUsage implements BaseProvider{
   Duration productListDelay;
@@ -19,13 +22,17 @@ class MockUsage implements BaseProvider{
 
   @override
   Future<Usage> getUsage(String productId) async {
+    var randomGen = Random();
+    var time = DateTime.now();
+    time = time.add(Duration(hours: -randomGen.nextInt(3), minutes: randomGen.nextInt(59)));
+    var lastUpdate = "${DateFormat('d MMMM y').format(time)} at ${DateFormat('jm').format(time)}";
     Usage result;
     switch (productId) {
       case 'a':
         result = Usage(
           id: 'a',
           packageName: 'Fibre 50 GB',
-          lastUpdate: 'Last updated: 2nd June 2019 at 3:01 PM',
+          lastUpdate: 'Last updated: $lastUpdate',
           usage: '4.70 GB of 50 GB',
         );
         break;
@@ -33,7 +40,7 @@ class MockUsage implements BaseProvider{
         result = Usage(
           id: 'b',
           packageName: 'LTE 100 GB',
-          lastUpdate: 'Last updated: 2nd June 2019 at 2:01 PM',
+          lastUpdate: 'Last updated: $lastUpdate',
           usage: '43.62 GB of 50 GB',
         );
         break;
@@ -41,7 +48,7 @@ class MockUsage implements BaseProvider{
         result = Usage(
           id: 'c',
           packageName: 'Fibre 50 GB',
-          lastUpdate: 'Last updated: 2nd June 2019 at 3:03 PM',
+          lastUpdate: 'Last updated: $lastUpdate',
           usage: '0.70 GB of 50 GB',
         );
         break;
