@@ -14,3 +14,8 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter, view our 
 [online documentation](https://flutter.io/docs), which offers tutorials, 
 samples, guidance on mobile development, and a full API reference.
+
+Icon made by Freepik from www.flaticon.com
+
+Create Seperate APK for 64 bit using
+- flutter build apk --target-platform android-arm64
