@@ -1,6 +1,7 @@
 import 'package:fibre_balance_check/home.dart';
 import 'package:fibre_balance_check/providers/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,9 +13,11 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _providers = <BaseProvider>[WebAfricaUsage(), MockUsage(usageDelay: Duration(seconds: 1))];
   BaseProvider _provider;
+  final _storage = new FlutterSecureStorage();
 
   bool _error = false;
   bool _loggingIn = false;
+  bool _saveDetails = false;
 
   @override
   initState() {
@@ -22,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
     _provider = _providers[0]; 
     });
+    loadSaved();
   }
 
   @override
@@ -42,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 40),
                 Text('WebAfrica only', style: TextStyle(color: Colors.red)),
                 SizedBox(height: 160),
-                Text('Select Internet Provider'),
+                Text('Select Internet Provider', style: TextStyle(color: Colors.blueGrey)),
                 DropdownButton(
                   value: _provider,
                   isExpanded: true,
@@ -58,20 +62,40 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 20.0),
             TextField(
               decoration: InputDecoration(
-                filled: true,
+                filled: false,
                 labelText: 'Username',
+                labelStyle: TextStyle(color: Colors.blueGrey, fontSize: 16),
               ),
               controller: _usernameController,
             ),
             SizedBox(height: 12.0),
             TextField(
               decoration: InputDecoration(
-                filled: true,
+                filled: false,
                 labelText: 'Password',
+                labelStyle: TextStyle(color: Colors.blueGrey, fontSize: 16),
               ),
               obscureText: true,
               controller: _passwordController,
             ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("Save Login",
+                  style: TextStyle(color: Colors.blueGrey, fontSize: 16),
+                ),
+                Checkbox(
+                  value: _saveDetails,
+                  onChanged: (value) {
+                    setState(() {
+                    _saveDetails = value; 
+                    });
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 40),
             ButtonBar(
               children: <Widget>[
                 FlatButton(
@@ -113,7 +137,28 @@ class _LoginPageState extends State<LoginPage> {
     return list;
   }
 
-  void attempLogin() {
+  void loadSaved() async {
+    String username = await _storage.read(key: 'username');
+    String password = await _storage.read(key: 'password');
+    if (username != null) {
+      setState(() {
+       _saveDetails = true; 
+      });
+      _usernameController.text = username;
+      if (password != null) {
+        _passwordController.text = password;
+      }
+    }
+  }
+
+  void attempLogin() async {
+    if (_saveDetails == true) {
+      _storage.write(key: 'username', value: _usernameController.text);
+      _storage.write(key: 'password', value: _passwordController.text);
+    } else {
+      _storage.deleteAll();
+    }
+
     setState(() {
       _error = false;
       _loggingIn = true;
