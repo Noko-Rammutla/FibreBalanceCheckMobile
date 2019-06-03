@@ -118,7 +118,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _resetUsage() async {
     final prefs = await SharedPreferences.getInstance();
-    for (var key in prefs.getKeys()) {
+    prefs.remove('hidden');
+    for (var key in await widget.usageProvider.getProductList()) {
       prefs.remove(key);
     }
     await _loadUsage();

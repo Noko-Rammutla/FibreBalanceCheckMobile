@@ -14,7 +14,7 @@ List<String> productList(String productsPage) {
     if (link.contains('LoginToDSLConsole')) {
       String id = RegExp(r'id=\d+').stringMatch(link);
       if (id != null) {
-        results.add(id);
+        results.add(id.substring(3));
       }
     }
   }
@@ -24,7 +24,7 @@ List<String> productList(String productsPage) {
 
 Usage getProduct(String productPage, String productId) {
   var result = Usage(
-    id: productId.substring(3),
+    id: productId,
     packageName: getInput(productPage, 'data-role', 'packageName'),
     lastUpdate: getSpan(productPage,
         'ctl00_ctl00_contentDefault_contentControlPanel_lbllastUpdted'),
@@ -45,7 +45,7 @@ class WebAfricaUsage implements BaseProvider{
   final String urlProducts =
       "https://www.webafrica.co.za/myservices.php?pagetype=adsl";
   final String urlProduct =
-      "https://www.webafrica.co.za/clientarea.php?action=productdetails&{productId}&modop=custom&a=LoginToDSLConsole";
+      "https://www.webafrica.co.za/clientarea.php?action=productdetails&id={productId}&modop=custom&a=LoginToDSLConsole";
   final String urlUsage = "https://usage.webafrica.co.za/usage.html";
   final String urlFibre =
       "https://www.webafrica.co.za/includes/fup.handler.php?cmd=getfupinfo&username=";

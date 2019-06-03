@@ -16,7 +16,7 @@ void main() {
       final String urlProducts =
           "https://www.webafrica.co.za/myservices.php?pagetype=adsl";
       final String urlProduct =
-          "https://www.webafrica.co.za/clientarea.php?action=productdetails&{productId}&modop=custom&a=LoginToDSLConsole";
+          "https://www.webafrica.co.za/clientarea.php?action=productdetails&id={productId}&modop=custom&a=LoginToDSLConsole";
       final String urlUsage = "https://usage.webafrica.co.za/usage.html";
       final String urlFibre =
           "https://www.webafrica.co.za/includes/fup.handler.php?cmd=getfupinfo&username=";
@@ -95,10 +95,13 @@ void main() {
 
     test('worker test', () async {
       var webAfricaUsage = WebAfricaUsage();
-      webAfricaUsage.login(_username, _password);
-      for (var productId in await webAfricaUsage.getProductList()) {
-        var usage = await webAfricaUsage.getUsage(productId);
-        print('${usage.packageName} = ${usage.usage}');
+      if (await webAfricaUsage.login(_username, _password)) {
+        for (var productId in await webAfricaUsage.getProductList()) {
+          var usage = await webAfricaUsage.getUsage(productId);
+          print('${usage.id} ${usage.packageName} = ${usage.usage}');
+        }
+      } else {
+        print('Login Failed');
       }
     });
   });
