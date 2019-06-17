@@ -22,6 +22,16 @@ List<String> productList(String productsPage) {
   return results;
 }
 
+List<double> _getAmounts(String usage) {
+  var searchStr = usage.replaceAll(',', '.');
+  var numbersExp = RegExp(r'[0-9]+\.[0-9]+');
+  var numberList = <double>[];
+  for (var num in numbersExp.allMatches(searchStr)) {
+    numberList.add(double.parse(searchStr.substring(num.start, num.end)));
+  }
+  return numberList;
+}
+
 Usage getProduct(String productPage, String productId) {
   var result = Usage(
     id: productId,
@@ -31,11 +41,22 @@ Usage getProduct(String productPage, String productId) {
   );
   var lteUsage = getSpan(productPage,
       'ctl00_ctl00_contentDefault_contentControlPanel_lblAnytimeCap');
-  if (lteUsage != '') {
-    lteUsage = lteUsage.substring(1, lteUsage.length - 1);
-    lteUsage = lteUsage.replaceAll(',', '.');
-    result.usage = lteUsage;
+  double usage = 0.0;
+  double total = 0.0;
+  var usageList = _getAmounts(lteUsage);
+  if (usageList.length == 2) {
+    usage += usageList[0];
+    total += usageList[1];
+    lteUsage = getSpan(productPage, 
+      'ctl00_ctl00_contentDefault_contentControlPanel_lblCalendarTopupCap');
+      usageList = _getAmounts(lteUsage);
+      if (usageList.length == 2) {
+        usage += usageList[0];
+        total += usageList[1];
+      }
+      result.usage = '${usage.toStringAsFixed(2)} of ${total.toStringAsFixed(2)} GB';
   }
+  
   return result;
 }
 
