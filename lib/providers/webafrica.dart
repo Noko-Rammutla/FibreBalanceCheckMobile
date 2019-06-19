@@ -54,7 +54,8 @@ Usage getProduct(String productPage, String productId) {
         usage += usageList[0];
         total += usageList[1];
       }
-      result.usage = '${usage.toStringAsFixed(2)} of ${total.toStringAsFixed(2)} GB';
+      double remaining = total - usage;
+      result.usage = 'You have ${remaining.toStringAsFixed(2)} GB remaining.';
   }
   
   return result;
@@ -147,8 +148,8 @@ class WebAfricaUsage implements BaseProvider{
       var map = json.decode(body);
       var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
       var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
-      results.usage =
-          '${usage.toStringAsFixed(2)} of ${total.toStringAsFixed(2)} GB';
+      double remaining = total - usage;
+      results.usage = 'You have ${remaining.toStringAsFixed(2)} GB remaining.';
     }
     return results;
   }
