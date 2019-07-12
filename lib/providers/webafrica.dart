@@ -24,8 +24,10 @@ List<String> productList(String productsPage) {
 
 double _getUnits(String units) {
   switch (units.toLowerCase()) {
-    case "mb": return 1e-3;
-    default: return 1;
+    case "mb":
+      return 1e-3;
+    default:
+      return 1;
   }
 }
 
@@ -47,30 +49,28 @@ Usage getProduct(String productPage, String productId) {
     packageName: getInput(productPage, 'data-role', 'packageName'),
     lastUpdate: getSpan(productPage,
         'ctl00_ctl00_contentDefault_contentControlPanel_lbllastUpdted'),
+    usage: 0,
+    total: 0,
   );
   var lteUsage = getSpan(productPage,
       'ctl00_ctl00_contentDefault_contentControlPanel_lblAnytimeCap');
-  double usage = 0.0;
-  double total = 0.0;
   var usageList = getAmounts(lteUsage);
   if (usageList.length == 2) {
-    usage += usageList[0];
-    total += usageList[1];
-    lteUsage = getSpan(productPage, 
-      'ctl00_ctl00_contentDefault_contentControlPanel_lblCalendarTopupCap');
-      usageList = getAmounts(lteUsage);
-      if (usageList.length == 2) {
-        usage += usageList[0];
-        total += usageList[1];
-      }
-      double remaining = total - usage;
-      result.usage = 'You have ${remaining.toStringAsFixed(2)} GB remaining.';
+    result.usage += usageList[0];
+    result.total += usageList[1];
+    lteUsage = getSpan(productPage,
+        'ctl00_ctl00_contentDefault_contentControlPanel_lblCalendarTopupCap');
+    usageList = getAmounts(lteUsage);
+    if (usageList.length == 2) {
+      result.usage += usageList[0];
+      result.total += usageList[1];
+    }
   }
-  
+
   return result;
 }
 
-class WebAfricaUsage implements BaseProvider{
+class WebAfricaUsage implements BaseProvider {
   final String urlHome = "https://www.webafrica.co.za/clientarea.php";
   final String urlLogin = "https://www.webafrica.co.za/dologin.php";
   final String urlProducts =
@@ -104,8 +104,7 @@ class WebAfricaUsage implements BaseProvider{
     response = await request.close();
     bool success = false;
     response.headers.forEach((String name, List<String> values) {
-      if (name == 'location' && values[0] == "/clientarea.php")
-        success = true;
+      if (name == 'location' && values[0] == "/clientarea.php") success = true;
     });
 
     return success;
@@ -155,10 +154,8 @@ class WebAfricaUsage implements BaseProvider{
       Stream<String> stream = response.transform(utf8.decoder);
       body = await stream.join();
       var map = json.decode(body);
-      var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
-      var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
-      double remaining = total - usage;
-      results.usage = 'You have ${remaining.toStringAsFixed(2)} GB remaining.';
+      results.usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
+      results.total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
     }
     return results;
   }

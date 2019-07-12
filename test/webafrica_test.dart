@@ -81,10 +81,8 @@ void main() {
           Stream<String> stream = response.transform(utf8.decoder);
           body = await stream.join();
           var map = json.decode(body);
-          var usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
-          var total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
-          results.usage =
-              '(${usage.toStringAsFixed(2)} GB of ${total.toStringAsFixed(2)} GB)';
+          results.usage = map['Data']['Usage'] / 1024 / 1024 / 1024;
+          results.total = map['Data']['Threshold'] / 1024 / 1024 / 1024;
         }
 
         usageList.add(results);

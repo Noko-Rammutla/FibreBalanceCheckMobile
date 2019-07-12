@@ -1,4 +1,5 @@
 import 'package:fibre_balance_check/common/usage.dart';
+import 'package:fibre_balance_check/widgets/usage_tile.dart';
 import 'package:flutter/material.dart';
 
 class UsageView extends StatefulWidget {
@@ -25,7 +26,6 @@ class _UsageViewState extends State<UsageView> {
         context: context,
         builder: _showDialog,
       );
-     
     }
   }
 
@@ -35,52 +35,7 @@ class _UsageViewState extends State<UsageView> {
       sizeFactor: CurvedAnimation(
           parent: widget.animationController, curve: Curves.easeOut),
       axisAlignment: 1.0,
-      child: Padding(
-          padding: EdgeInsets.only(bottom: 8),
-          child: PopupMenuButton(
-            itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Delete'),
-                  ),
-                  PopupMenuItem(
-                    value: 'rename',
-                    child: Text('Rename'),
-                  )
-                ],
-            onSelected: _onSelected,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  width: 2,
-                  color: Colors.black,
-                ),
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-              ),
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    widget.usage.packageName,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(widget.usage.usage,
-                          style: TextStyle(color: Colors.blueGrey)),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(widget.usage.lastUpdate)),
-                  ),
-                ],
-              ),
-            ),
-          )),
+      child: UsageTile(usage: widget.usage, onContextMenu: _onSelected)
     );
   }
 

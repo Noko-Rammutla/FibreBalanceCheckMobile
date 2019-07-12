@@ -33,7 +33,8 @@ class MockUsage implements BaseProvider{
           id: 'a',
           packageName: 'Fibre 50 GB',
           lastUpdate: 'Last updated: $lastUpdate',
-          usage: '4.70 GB of 50 GB',
+          usage: 4.7,
+          total: 50,
         );
         break;
       case 'b':
@@ -41,7 +42,8 @@ class MockUsage implements BaseProvider{
           id: 'b',
           packageName: 'LTE 100 GB',
           lastUpdate: 'Last updated: $lastUpdate',
-          usage: '43.62 GB of 50 GB',
+          usage: 43.62,
+          total: 50,
         );
         break;
       case 'c': 
@@ -49,7 +51,8 @@ class MockUsage implements BaseProvider{
           id: 'c',
           packageName: 'Fibre 50 GB',
           lastUpdate: 'Last updated: $lastUpdate',
-          usage: '0.70 GB of 50 GB',
+          usage: 0.7,
+          total: 50,
         );
         break;
       default:
