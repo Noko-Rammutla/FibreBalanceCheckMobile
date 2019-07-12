@@ -105,4 +105,29 @@ void main() {
       }
     });
   });
+
+  test('usage parse', () {
+    const usageStrings = [
+      "(21,7 GB of 100 GB)",
+      "(21,7 MB of 100,0 GB)",
+      "(21.7 MB of 1000 MB)",
+    ];
+    const usageAmounts = [
+      [21.7, 100],
+      [0.0217, 100],
+      [0.0217, 1]
+    ];
+    
+    expect(usageStrings.length, usageAmounts.length, reason: "usage string should be equal to usage amounts");
+
+    for (var i = 0; i < usageStrings.length; i++) {
+      var actual = getAmounts(usageStrings[i]);
+      expect(actual.length, 2, reason: "usage amount should contain [usage, total]");  
+      var compare = usageAmounts[i];
+      expect(compare.length, 2, reason: "usage amount should contain [usage, total]");
+
+      expect(actual[0], compare[0], reason: "usage amount should match"); 
+      expect(actual[1], compare[1], reason: "usage amount should match");  
+    }
+  });
 }

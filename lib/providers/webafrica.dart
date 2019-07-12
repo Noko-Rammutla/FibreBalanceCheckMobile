@@ -22,12 +22,21 @@ List<String> productList(String productsPage) {
   return results;
 }
 
-List<double> _getAmounts(String usage) {
+double _getUnits(String units) {
+  switch (units.toLowerCase()) {
+    case "mb": return 1e-3;
+    default: return 1;
+  }
+}
+
+List<double> getAmounts(String usage) {
   var searchStr = usage.replaceAll(',', '.');
-  var numbersExp = RegExp(r'[0-9]+\.[0-9]+');
+  var numbersExp = RegExp(r'([0-9]+\.?[0-9]*)\ (\w*)');
   var numberList = <double>[];
   for (var num in numbersExp.allMatches(searchStr)) {
-    numberList.add(double.parse(searchStr.substring(num.start, num.end)));
+    var digits = num.group(1);
+    var units = num.group(2);
+    numberList.add(double.parse(digits) * _getUnits(units));
   }
   return numberList;
 }
@@ -43,13 +52,13 @@ Usage getProduct(String productPage, String productId) {
       'ctl00_ctl00_contentDefault_contentControlPanel_lblAnytimeCap');
   double usage = 0.0;
   double total = 0.0;
-  var usageList = _getAmounts(lteUsage);
+  var usageList = getAmounts(lteUsage);
   if (usageList.length == 2) {
     usage += usageList[0];
     total += usageList[1];
     lteUsage = getSpan(productPage, 
       'ctl00_ctl00_contentDefault_contentControlPanel_lblCalendarTopupCap');
-      usageList = _getAmounts(lteUsage);
+      usageList = getAmounts(lteUsage);
       if (usageList.length == 2) {
         usage += usageList[0];
         total += usageList[1];
