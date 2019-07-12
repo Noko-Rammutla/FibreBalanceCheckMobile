@@ -145,7 +145,7 @@ class WebAfricaUsage implements BaseProvider {
     var body = await stream.join();
 
     var results = getProduct(body, productId);
-    if (results.usage == null) {
+    if (results.total == 0) {
       String username = getInput(body, 'data-role', 'userName');
       request = await _client
           .getUrl(Uri.parse(urlFibre + Uri.encodeQueryComponent(username)));

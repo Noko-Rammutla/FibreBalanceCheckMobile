@@ -1,4 +1,5 @@
 import 'package:fibre_balance_check/common/usage.dart';
+import 'package:fibre_balance_check/widgets/progress_meter.dart';
 import 'package:flutter/material.dart';
 
 class UsageTile extends StatelessWidget {
@@ -32,25 +33,43 @@ class UsageTile extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(5)),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                usage.packageName,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, top: 5),
+                child: Text(
+                  usage.packageName,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                      'You have ${(usage.total - usage.usage).toStringAsFixed(2)} GB remaining.',
-                      style: TextStyle(color: Colors.blueGrey)),
+                  alignment: Alignment.center,
+                  child: RichText(
+                    text: TextSpan(
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                        TextSpan(text: '${(usage.total - usage.usage).toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.blueGrey[600])),
+                        TextSpan(text: '/',
+                          style: TextStyle(color: Colors.grey, fontSize: 20)),
+                        TextSpan(text: '${usage.total.toStringAsFixed(2)}'),
+                        TextSpan(text: ' GB')
+                      ]
+                    ),
+                  )
                 ),
+              ),
+              ProgressMeter(
+                usage: usage.usage,
+                total: usage.total,
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(usage.lastUpdate)),
+                    child: Text(usage.lastUpdate, style: TextStyle(color: Colors.grey))),
               ),
             ],
           ),
